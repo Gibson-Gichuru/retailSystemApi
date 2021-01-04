@@ -1,0 +1,6 @@
+api/bin/
+api/include/
+api/lib/
+api/lib64/
+api/share/
+api/pyvenv.cfg
