@@ -2,8 +2,10 @@
 """
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
+ma = Marshmallow()
 
 class Crud():
 
@@ -33,7 +35,7 @@ class UserRole(Crud, db.Model):
 
 class Users(Crud, db.Model):
 
-	userId = db.Column(db.Integer, primary_key = True)
+	userId = db.Column(db.String(50), primary_key = True)
 	user_first_name = db.Column(db.String(100), nullable = False)
 	user_last_name = db.Column(db.String(100), nullable = False)
 	user_email = db.Column(db.String(250), unique = True, nullable = False)
