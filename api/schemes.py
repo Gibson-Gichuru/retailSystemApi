@@ -107,30 +107,3 @@ class creditorSchema(ma.Schema):
 	receptNumber = fields.Nested(ReceptSchema, only = ['receptId', 'dateOfPurchase', 'url'])
 
 	dateDue = fields.Date('%Y-%m-%d')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
-			
-
-
-
-
-
-
-
-
-
-
-
