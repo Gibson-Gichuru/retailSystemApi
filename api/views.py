@@ -632,25 +632,402 @@ class productResourceList(Resource):
 				return response, status.HTTP_400_BAD_REQUEST
 
 class paymentResource(Resource):
-	pass
+	
+	def get(self, name):
+
+		paymentMode = PaymentMethod.query.get_or_404(name)
+
+		results = paymentSchema.dump(paymentMode).data
+
+		return results
+
+	def patch(self, name):
+
+		request_dict = request.get_json(force = True)
+
+		paymentMode = PaymentMethod.query.get_or_404(name)
+
+		if 'name' in request_dict:
+
+			paymentMode.name = request_dict['name']
+
+
+		dumped_message, dumped_errors = paymentSchema.dump(paymentMode)
+
+		if dumped_errors:
+
+			return dumped_errors, status.HTTP_400_BAD_REQUEST
+
+		validate_errors = paymentSchema.validate(dumped_message)
+
+		if validate_errors:
+
+			return validate_errors, status.HTTP_400_BAD_REQUEST
+
+
+		try:
+
+			paymentMode.update()
+			return self.get(name)
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = jsonify(dict(Error = str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
+	def delete(self,name):
+
+		paymentMode = paymentMode.query.get_or_404(name)
+
+		try:
+
+			delete = paymentMode.delete(paymentMode)
+
+			response = make_response()
+
+			return response, status.HTTP_204_NO_CONTENT
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = jsonify(dict(Error = str(databaseError)))
+
+			return response, status.HTTP_401_UNAUTHORIZED
 
 class paymentResourceList(Resource):
 
-	pass
+	def get(self):
+
+		paymentModes = PaymentMethod.query.all()
+
+		results = paymentSchema.dump(many = True, paymentModes)
+
+		return results
+
+
+	def post(self):
+
+		request_dict = request.get_json(force = True)
+
+		if not request_dict:
+
+			response = dict(Error: = "No input data provided")
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+		errors = paymentSchema.validate(request_dict)
+
+		if errors:
+
+			return errors, HTTP_400_BAD_REQUEST
+
+		try:
+
+			checkPaymentMode = PaymentMethod.query.filter_by(name = request_dict['name']).first()
+
+			if checkPaymentMode is None:
+
+				newPaymentMode = PaymentMethod(name = request_dict['name'])
+
+				newPaymentMode.create(newPaymentMode)
+
+				query = PaymentMethod.query.get(newPaymentMode.id)
+
+				results = paymentSchema.dump(query).data
+
+				return results, status.HTTP_201_CREATED
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = jsonify(dict(Error: str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
 
 class receptResource(Resource):
-	pass
+	def get(self, id):
+
+		recept = ReceptBook.query.get_or_404(id)
+
+		results = ReceptSchema.dump(recept).data
+
+		return results
+
+	def patch(self, id):
+
+		request_dict = request.get_json(force = True)
+
+		recept = ReceptBook.query.get_or_404(id)
+
+		if 'dateOfPurchase' in request_dict:
+
+			recept.dateOfPurchase = request_dict['dateOfPurchase']
+
+		if 'amount' in request_dict:
+
+			recept.amount = request_dict['amount']
+
+		if 'meansOfpayment' in request_dict:
+
+			checkPaymentMode = PaymentMethod.query.filter_by(name = request_dict['name']).first()
+
+			if checkPaymentMode is None:
+
+				response = dict(Error:"Payment method {} not available".format(request['meansOfpayment']))
+
+				return response, status.HTTP_400_BAD_REQUEST
+
+			else:
+				
+				recept.meansOfpayment = checkPaymentMode
+
+				try:
+					recept.update()
+
+					return self.get(id)
+				except SQLAlchemyError as databaseError:
+
+					db.session.rollback()
+
+					response = jsonify(dict(Error = str(databaseError)))
+
+					return response, status.HTTP_400_BAD_REQUEST
+
+	def delete(self, id):
+
+		paymentMode = PaymentMethod.query.get_or_404(id)
+
+		try:
+			delete = paymentMode.delete(paymentMode)
+			response = make_response()
+
+			return response, status.HTTP_204_NO_CONTENT
+
+		except SQLAlchemyError as databaseError:
+			
+			db.session.rollback()
+
+			response = jsonify(dict(Error: str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
+			
 
 class receptResourceList(Resource):
-	pass
+	
+	def get(self):
+
+		recepts = ReceptBook.query.all()
+
+		results = ReceptSchema.dump(many = True, recepts)
+
+		return results
+
+	def post(self):
+
+		request_dict = request.get_json(force = True)
+
+		if not request_dict:
+
+			response = dict(Error: "No data input was given")
+
+		errors = ReceptSchema.validate(request_dict)
+
+		if errors:
+
+			return errors, status.HTTP_400_BAD_REQUEST
+
+		try:
+			newRecept = ReceptBook(dateOfPurchase = request_dict['dateOfPurchase'],
+				amount = request_dict['amount'])
+
+			checkPaymentMode = PaymentMethod.query.filter_by(name = request_dict['meansOfpayment'])
+
+			if checkPaymentMode is None:
+
+				response = dict(Error: "Payment method not available")
+
+				return response, status.HTTP_400_BAD_REQUEST
+
+			else:
+				
+				newRecept.meansOfpayment = checkPaymentMode
+
+				newRecept.create(newRecept)
+
+				query = ReceptBook.query.get(newRecept.receptId)
+
+				results = ReceptSchema.dump(query).data
+
+				return results, status.HTTP_201_CREATED
+			
+		except SQLAlchemyError as databaseError:
+			
+			db.session.rollback()
+
+			response = jsonify(dict(Error: str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
 
 class creditorResource(Resource):
 
-	pass
-manufactureDate
+	def get(self, id):
+
+		creditor = Creditor.query.get_or_404(id)
+
+		results = creditorSchema.dump(creditor).data 
+
+		return results
+
+	def patch(self, id):
+
+		request_dict = request.get_json(force = True)
+
+		creditor = Creditor.query.get_or_404(id)
+
+		if 'creditorId' in request_dict:
+			creditor.creditorId = request_dict['creditorId']
+
+		if 'creditorFistName' in request_dict:
+			creditor.creditorFistName = request_dict['creditorFistName']
+
+		if 'creditorLastName' in request_dict:
+
+			creditor.creditorLastName = request_dict['creditorLastName']
+
+		if 'amountDue' in request_dict:
+
+			creditor.amountDue = request_dict['amountDue']
+
+		if 'dateDue' in request_dict:
+
+			creditor.dateDue = request_dict['dateDue']
+
+		if 'recept' in request_dict:
+
+			checkRecept = ReceptBook.query.filter_by(receptId = request_dict['recept'])
+
+			if checkRecept not None:
+
+				creditor.recept = checkRecept
+
+		dumped_message, dumped_errors = creditorSchema.dump(creditor)
+
+		if dumped_errors:
+
+			return dumped_errors, status.HTTP_400_BAD_REQUEST
+
+		validate_errors = creditorSchema.validate(dumped_message)
+
+		if validate_errors:
+
+			return validate_errors, status.HTTP_400_BAD_REQUEST
+
+
+		try:
+
+			creditor.update()
+
+			return self.get(id)
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response  = jsonify(dict(Error: str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
+	def delete(self, id):
+
+		creditor = Creditor.query.get_or_404(id)
+
+		try:
+			delete = creditor.deleta(creditor)
+
+			response = make_response()
+
+			return response, status.HTTP_204_NO_CONTENT
+		except SQLAlchemyError as databaseError:
+			
+			db.session.rollback()
+
+			response = jsonify(dict(Error: str(databaseError)))
+
+			return response, status.HTTP_401_UNAUTHORIZED
+
+
 class creditorResourceList(Resource):
 
-	pass
+	def get(self):
+
+		creditors = Creditor.query.all()
+
+		results = creditorSchema(many = True, creditors)
+
+		return results
+
+	def post(self):
+
+		request_dict = request.get_json(force = True)
+
+		if not request_dict:
+
+			response = dict(Error = "No input data was provided ")
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+		errors = creditorSchema.validate(request_dict)
+
+		if errors:
+
+			return errors, status.HTTP_400_BAD_REQUEST
+
+		try:
+
+			newCreditor = Creditor(creditorId = request_dict['creditorId'],
+				creditorFistName = request_dict['creditorFistName'], 
+				creditorLastName = request_dict['creditorLastName'], 
+				creditorPhoneNumber = request_dict['creditorPhoneNumber'],
+				amountDue = request_dict['amountDue'])
+
+			checkRecept = ReceptBook.query.filter_by(receptId = request_dict['recept']).first()
+
+			if checkRecept not None:
+
+				newCreditor.recept = checkRecept
+
+				newCreditor.create(newCreditor)
+
+				query = Creditor.query.get(newCreditor.id)
+
+				results = creditorSchema.dump(query).data
+
+				return results, status.HTTP_201_CREATED
+
+
+			else:
+				
+				response = dict(Error = "The recept Number {} is not processed yet".format(request_dict['recept']))
+
+				return response, status.HTTP_400_BAD_REQUEST
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = jsonify(dict(Error = str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
+			
 
 
 api.add_resource(userRoleResource, '/userRoles')
@@ -667,9 +1044,3 @@ api.add_resource(receptResource,'/recept')
 api.add_resource(receptResourceList,'/recept/<int:id>')
 api.add_resource(creditorResource, '/creditor')
 api.add_resource(creditorResourceList, '/creditor/<id>')
-
-
-
-
-
-
