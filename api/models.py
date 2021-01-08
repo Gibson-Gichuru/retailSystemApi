@@ -76,18 +76,20 @@ class Products(Crud, db.Model):
 	productDescription = db.Column(db.String(200), nullable = False)
 	manufactureDate = db.Column(db.DateTime, nullable = False)
 	expiryDate = db.Column(db.DateTime, nullable = False)
-	amount = db.Column(db.Integer, nullable = False)
+	quantity = db.Column(db.Integer, nullable = False)
+	price = db.Column(db.Decimal(4,2), nullable = False)
 
 	category = db.relationship("ProductCategory", backref = db.backref("category", order_by = "productCode"))
 
-	def __init__(self, productCode, productName, productDescription, manufactureDate, expiryDate, amount):
+	def __init__(self, productCode, productName, productDescription, manufactureDate, expiryDate, quantity,price):
 
 		self.productCode = productCode
 		self.productName = productName
 		self.productDescription = productDescription
 		self.manufactureDate = manufactureDate
 		self.expiryDate = expiryDate
-		self.amount = amount
+		self.quantity = quantity
+		self.price = price
 
 class PaymentMethod(Crud, db.Model):
 

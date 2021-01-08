@@ -1,4 +1,4 @@
-from models import (UserRole, Users, ProductCategory, Prodcuts, 
+from models import (UserRole, Users, ProductCategory, Products, 
 	PaymentMethod,ReceptBook, Creditor, db)
 
 from schemes import (userRoleSchema, UserSchema, ProductCategorySchema,
@@ -78,7 +78,7 @@ class userRoleResource(Resource):
 
 		try:
 
-			UserRole.delete(role)
+			delete = role.delete(role)
 
 			response = make_response
 
@@ -235,7 +235,7 @@ class userResource(Resource):
 
 		try:
 
-			User.delete(user)
+			delete = user.delete(user)
 
 			response = make_response()
 
@@ -321,19 +321,315 @@ class userResourceList(Resource):
 
 class productCategoryResource(Resource):
 
-	pass
+	def get(self, id):
+
+		category = ProductCategory.query.get_or_404(id)
+
+		results = ProductCategorySchema.dump(category).data
+
+		return results
+
+
+	def patch(self, id):
+
+		request_dict = request.get_json(force = True)
+
+		category = category = ProductCategory.query.get_or_404(id)
+
+		if 'name' in request_dict:
+
+			category.name = request_dict['name']
+
+		if 'discount' in request_dict:
+
+			category.discount = request_dict['discount']
+
+		if 'vatTax' in request_dict:
+
+			category.vatTax = request_dict['vatTax']
+
+
+		dumped_message, dumped_errors = ProductCategorySchema.dump(category)
+
+		if dumped_errors:
+
+			return dumped_errors, status.HTTP_400_BAD_REQUEST
+
+
+		validate_errors = ProductCategorySchema.validate(dumped_message)
+
+
+		if validate_errors:
+
+			return validate_errors, status.HTTP_400_BAD_REQUEST
+
+
+		try:
+
+			category.update(category)
+
+			return self.get(id)
+
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+			response = jsonify({"Error":str(databaseError)})
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
+	def delete(self, id):
+
+		category = ProductCategory.query.get_or_404(id)
+
+		try:
+
+			category.delete(category)
+
+			response = make_response()
+
+			return response, status.HTTP_204_NO_CONTENT
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = jsonify(dict(Error = str(databaseError)))
+
+			return response, status.HTTP_401_UNAUTHORIZED
+
 
 class productCategoryResourceList(Resource):
 
-	pass
+	def get(self):
+
+		categoryList  ProductCategory.query.all()
+
+		results = ProductCategorySchema(many = True, categoryList).data
+
+		return results
+
+	def post(self):
+
+		request_dict = request.get_json(force = True)
+
+		if not request_dict:
+
+			response = dict(Error: "No input data was given")
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
+		errors = ProductCategorySchema.validate(request_dict)
+
+		if errors:
+
+			return errors, status.HTTP_400_BAD_REQUEST
+
+
+		try:
+
+			checkCategory = ProductCategory.query.filter_by(name = request_dict['name']).first()
+
+
+			if checkCategory is None:
+
+				newCategory  = ProductCategory(name = request_dict['name'], 
+					discount = request_dict['discount'], vatTax = request_dict['vatTax'])
+
+				newCategory.create(newCategory)
+
+				query = ProductCategory.query.get(newCategory.id)
+
+				results = ProductCategorySchema.dump(query).data
+
+				return results, status.HTTP_201_CREATED
+
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+			response = jsonify(dict(Error = str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
 
 class productResource(Resource):
 
-	pass
+	def get(self, id):
+
+		product = Products.query.get_or_404(id)
+
+		results = productSchema.dump(product).data
+
+		return results
+
+
+	def patch(self, id):
+
+		request_dict = request.get_json(force = True)
+
+		product = Products.query.get_or_404(id)
+
+		if 'productCode' in request_dict:
+
+			product.productCode = request_dict['productCode']
+
+
+		if 'productName' in request_dict:
+
+			product.productName = request_dict['productName']
+
+		if 'productDescription' in request_dict:
+
+			product.productDescription = request_dict['productDescription']
+
+		if 'manufactureDate' in request_dict:
+
+			product.manufactureDate = request_dict['manufactureDate']
+
+		if 'expiryDate' in request_dict:
+
+			product.expiryDate = request_dict['expiryDate']
+
+		if 'price' in request_dict:
+
+			product.amount = request_dict['price']
+
+		if 'quatity' in request_dict:
+
+			product.quatity = request_dict['quatity']
+
+		if 'category' in request_dict:
+
+			checkCategory  = ProductCategory.query.filter_by(name = request_dict['category']).first()
+
+			if checkCategory is None:
+
+				response = dict(Error = "The given product Category does not exist")
+
+				return response, status.HTTP_400_BAD_REQUEST
+
+			else:
+
+				product.category = checkCategory
+
+
+		dumped_message, dumped_errors = productSchema.dump(product)
+
+
+		if dumped_errors:
+
+			return dumped_errors, status.HTTP_400_BAD_REQUEST
+
+		validate_errors = productSchema.validate(dumped_message)
+
+		if  validate_errors:
+
+			return validate_errors, status.HTTP_400_BAD_REQUEST
+
+
+		try:
+
+			product.update(product)
+
+			return self.get(id)
+
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = dict(Error = str(databaseError))
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
+	def delete(self, id):
+
+		product = Products.query.get_or_404(id)
+
+		try:
+
+			delete  = product.delete(product)
+
+			response = make_response()
+
+			return response, HTTP_401_UNAUTHORIZED
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = dict(Error = str(databaseError))
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+
+
+
 
 class productResourceList(Resource):
 
-	pass
+	def get(self):
+
+		products = Products.query.all()
+
+		results = productSchema.dump(many = True, products)
+
+		return results
+
+	def post(self):
+
+		request_dict = request.get_json(force = True)
+
+		if not request_dict:
+
+			response = dict(Error = "No imput data was given")
+
+			return response, status.HTTP_400_BAD_REQUEST
+
+		errors = productSchema.validate(request_dict)
+
+		if errors:
+
+			return errors, status.HTTP_400_BAD_REQUEST
+
+
+		try:
+
+			checkProduct = Products.query.filter_by(productCode = request_dict['productCode']).first()
+
+			if checkProduct is None:
+
+				newProduct = Products(productCode = request_dict['productCode'], productName = request_dict['productName'],
+					productDescription = request_dict['productDescription'],expiryDate= request_dict['expiryDate'],
+					quantity = request_dict['quantity'], price = request['price'])
+
+
+				checkCategory = ProductCategory.query.filter_by(name = request_dict['category'])
+
+				if checkCategory is None:
+
+					response = dict(Error = "The given Product Category does not exist")
+
+					return response, status.HTTP_400_BAD_REQUEST
+
+				else:
+					
+					newProduct.category = checkCategory
+					newProduct.create(newProduct)
+
+					query = Products.query.get(newProduct.id)
+
+					results = productSchema.dump(query).data
+
+					return results, status,HTTP_201_CREATED
+
+			else:manufactureDate
+				response = dict(Error = "Product with the given productCode aready exists")
+
+				return response, status.HTTP_400_BAD_REQUEST
 
 class paymentResource(Resource):
 	pass
@@ -351,7 +647,7 @@ class receptResourceList(Resource):
 class creditorResource(Resource):
 
 	pass
-
+manufactureDate
 class creditorResourceList(Resource):
 
 	pass
