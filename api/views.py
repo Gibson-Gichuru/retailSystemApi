@@ -11,7 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 import status
 
-api_db = Blueprint('api', __name__)
+api_dp = Blueprint('api', __name__)
 user_role_schema = userRoleSchema()
 user_schema = UserSchema()
 product_category_schema = ProductCategorySchema()
@@ -19,7 +19,7 @@ product_schema = productSchema()
 payment_schema = paymentSchema()
 recept_schema = ReceptSchema()
 creditor_schema = creditorSchema()
-api = Api(api_db)
+api = Api(api_dp)
 
 class userRoleResource(Resource):
 	#resource class used to get, update and delete a given userRole
@@ -67,7 +67,7 @@ class userRoleResource(Resource):
 
 			db.session.rollback()
 
-			response  = jsonify({"ERROR": str(databaseError)})
+			response  = jsonify({"Message": str(databaseError)})
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -88,7 +88,7 @@ class userRoleResource(Resource):
 
 			db.session.rollback()
 
-			response = jsonify({"Error": str(databaseErrors)})
+			response = jsonify({"Message": str(databaseErrors)})
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -112,15 +112,16 @@ class userRoleResourceList(Resource):
 
 		if not request_dict:
 
-			response = {"Input Error": "No input data was given"}
+			response = {"Message": "No input data was given"}
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-		validate_errors = userRoleSchema.validate(request_dict)
 
-		if validate_errors:
+		errors = userRoleSchema.validate(request_dict)
 
-			return validate_errors, status.HTTP_400_BAD_REQUEST
+		if errors:
+
+			return errors, status.HTTP_400_BAD_REQUEST
 
 		try:
 
@@ -128,7 +129,7 @@ class userRoleResourceList(Resource):
 
 			if role:
 
-				response = {"Error": "Role with a given name Exists"}
+				response = {"Message": "Role with a given name Exists"}
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -149,7 +150,7 @@ class userRoleResourceList(Resource):
 
 			db.session.rollback()
 
-			response = jsonify({"Error": str(databaseErrors)})
+			response = jsonify({"Message": str(databaseErrors)})
 
 			return response, HTTP_400_BAD_REQUEST
 
@@ -224,7 +225,7 @@ class userResource(Resource):
 
 			db.session.rollback()
 
-			response  = jsonify({"Errors": str(databaseError)})
+			response  = jsonify({"Message": str(databaseError)})
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -246,7 +247,7 @@ class userResource(Resource):
 
 			db.session.rollback()
 
-			response = jsonify({"Error": str(databaseError)})
+			response = jsonify({"Message": str(databaseError)})
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -269,7 +270,7 @@ class userResourceList(Resource):
 
 		if not request_dict:
 
-			response = {"Input Error":"No input data was given"}
+			response = {"Message":"No input data was given"}
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -285,7 +286,7 @@ class userResourceList(Resource):
 
 			if checkUser:
 
-				response = {"Error": "user with the given Id aready exists"}
+				response = {"Message": "user with the given Id aready exists"}
 
 				return response, status.HTTP_302_FOUND
 
@@ -315,7 +316,7 @@ class userResourceList(Resource):
 
 			db.session.rollback()
 
-			response = jsonify({"Error":str(databaseError)})
+			response = jsonify({"Message":str(databaseError)})
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -374,7 +375,7 @@ class productCategoryResource(Resource):
 		except SQLAlchemyError as databaseError:
 
 			db.session.rollback()
-			response = jsonify({"Error":str(databaseError)})
+			response = jsonify({"Message":str(databaseError)})
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -395,7 +396,7 @@ class productCategoryResource(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -450,7 +451,7 @@ class productCategoryResourceList(Resource):
 		except SQLAlchemyError as databaseError:
 
 			db.session.rollback()
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -506,7 +507,7 @@ class productResource(Resource):
 
 			if checkCategory is None:
 
-				response = dict(Error = "The given product Category does not exist")
+				response = dict(Message = "The given product Category does not exist")
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -540,7 +541,7 @@ class productResource(Resource):
 
 			db.session.rollback()
 
-			response = dict(Error = str(databaseError))
+			response = dict(Message= str(databaseError))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -585,7 +586,7 @@ class productResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error = "No imput data was given")
+			response = dict(Message= "No imput data was given")
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -628,7 +629,7 @@ class productResourceList(Resource):
 
 			else:
 
-				response = dict(Error = "Product with the given productCode aready exists")
+				response = dict(Message = "Product with the given productCode aready exists")
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -636,7 +637,7 @@ class productResourceList(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Errors = str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -683,7 +684,7 @@ class paymentResource(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message = str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -704,7 +705,7 @@ class paymentResource(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -725,7 +726,7 @@ class paymentResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error= "No input data provided")
+			response = dict(Message= "No input data provided")
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -755,7 +756,7 @@ class paymentResourceList(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -790,7 +791,7 @@ class receptResource(Resource):
 
 			if checkPaymentMode is None:
 
-				response = dict(Error= "Payment method {} not available".format(request['meansOfpayment']))
+				response = dict(Message= "Payment method {} not available".format(request['meansOfpayment']))
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -806,7 +807,7 @@ class receptResource(Resource):
 
 					db.session.rollback()
 
-					response = jsonify(dict(Error = str(databaseError)))
+					response = jsonify(dict(Message= str(databaseError)))
 
 					return response, status.HTTP_400_BAD_REQUEST
 
@@ -824,7 +825,7 @@ class receptResource(Resource):
 			
 			db.session.rollback()
 
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 			
@@ -845,7 +846,7 @@ class receptResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error = "No data input was given")
+			response = dict(Message= "No data input was given")
 
 		errors = ReceptSchema.validate(request_dict)
 
@@ -861,7 +862,7 @@ class receptResourceList(Resource):
 
 			if checkPaymentMode is None:
 
-				response = dict(Error = "Payment method not available")
+				response = dict(Message= "Payment method not available")
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -881,7 +882,7 @@ class receptResourceList(Resource):
 			
 			db.session.rollback()
 
-			response = jsonify(dict(Error= str(databaseError)))
+			response = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -950,7 +951,7 @@ class creditorResource(Resource):
 
 			db.session.rollback()
 
-			response  = jsonify(dict(Error = str(databaseError)))
+			response  = jsonify(dict(Message= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -969,7 +970,7 @@ class creditorResource(Resource):
 			
 			db.session.rollback()
 
-			response = jsonify(dict(Error=  str(databaseError)))
+			response = jsonify(dict(Message=str(databaseError)))
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -990,7 +991,7 @@ class creditorResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error = "No input data was provided ")
+			response = dict(Message= "No input data was provided ")
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -1025,7 +1026,7 @@ class creditorResourceList(Resource):
 
 			else:
 				
-				response = dict(Error = "The recept Number {} is not processed yet".format(request_dict['recept']))
+				response = dict(Message = "The recept Number {} is not processed yet".format(request_dict['recept']))
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -1033,23 +1034,22 @@ class creditorResourceList(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Error = str(databaseError)))
+			response = jsonify(dict(Message = str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 			
 
-
-api.add_resource(userRoleResource, '/userRoles')
-api.add_resource(userRoleResourceList,'userRoles/<int:id>')
-api.add_resource(userResource, '/users')
-api.add_resource(userResourceList, '/users/<int:id>')
-api.add_resource(productCategoryResource, '/ProductCategory')
-api.add_resource(productCategoryResourceList,'/ProductCategory/<int:id>')
-api.add_resource(productResource, '/products')
-api.add_resource(productResourceList,'/products/<productCode>')
-api.add_resource(paymentResource,'/payments')
-api.add_resource(paymentResourceList, '/payments/<int:id>')
-api.add_resource(receptResource,'/recept')
-api.add_resource(receptResourceList,'/recept/<int:id>')
-api.add_resource(creditorResource, '/creditor')
-api.add_resource(creditorResourceList, '/creditor/<id>')
+api.add_resource(userRoleResourceList,'/userRoles')
+api.add_resource(userRoleResource, '/userRoles/<int:id>')
+api.add_resource(userResourceList, '/users')
+api.add_resource(userResource, '/users/<int:id>')
+api.add_resource(productCategoryResourceList,'/ProductCategory')
+api.add_resource(productCategoryResource, '/ProductCategory/<int:id>')
+api.add_resource(productResourceList,'/products')
+api.add_resource(productResource, '/products/<productCode>')
+api.add_resource(paymentResourceList, '/payments')
+api.add_resource(paymentResource,'/payments/<int:id>')
+api.add_resource(receptResourceList,'/recept')
+api.add_resource(receptResource,'/recept/<int:id>')
+api.add_resource(creditorResourceList, '/creditor')
+api.add_resource(creditorResource, '/creditor/<id>')

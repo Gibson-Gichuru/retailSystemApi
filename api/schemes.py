@@ -92,7 +92,7 @@ class ReceptSchema(ma.Schema):
 
 	creditor = fields.Nested('creditorSchema', many = True, exclude = ('receptNumber',))
 
-	url = ma.URLFor('api.ReceptResource')
+	url = ma.URLFor('api.receptResource')
 
 
 class creditorSchema(ma.Schema):
@@ -107,3 +107,5 @@ class creditorSchema(ma.Schema):
 	receptNumber = fields.Nested(ReceptSchema, only = ['receptId', 'dateOfPurchase', 'url'])
 
 	dateDue = fields.Date('%Y-%m-%d')
+
+	url = ma.URLFor('api.creditorResource')

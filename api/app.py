@@ -10,9 +10,9 @@ def create_app(config_filename):
 
 	db.init_app(app)
 
-	from views import api_db
+	from views import api_dp
 
-	app.register_blueprint(api_db, url_prefix = '/api')
+	app.register_blueprint(api_dp, url_prefix = '/api')
 
 
 	return app
