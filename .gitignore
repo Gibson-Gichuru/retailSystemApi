@@ -4,3 +4,5 @@ api/lib/
 api/lib64/
 api/share/
 api/pyvenv.cfg
+__pycache__/
+migrations/

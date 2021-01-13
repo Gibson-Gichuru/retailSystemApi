@@ -9,7 +9,7 @@ class userRoleSchema(ma.Schema):
 	id = fields.Integer(dump_only = True)
 	name = fields.String(required = True, validate = validate.Length(3))
 
-	users = fields.Nested("UserSchema", many = True, exclude = ('role,'))
+	users = fields.Nested("UserSchema", many = True, exclude = ('role',))
 
 	url  = ma.URLFor('api.userRoleResource', id = "<int:id>", _external = True)
 
@@ -53,9 +53,9 @@ class ProductCategorySchema(ma.Schema):
 	discount = fields.Decimal(8,2)
 	vatTax = fields.Decimal(2,1)
 
-	products = fields.Nested("ProductSchema", many = True, exclude = ('category,'))
+	products = fields.Nested("ProductSchema", many = True, exclude = ('category',))
 
-	url = URLFor('api.productCategoryResource')
+	url = ma.URLFor('api.productCategoryResource')
 
 
 class productSchema(ma.Schema):
@@ -70,7 +70,7 @@ class productSchema(ma.Schema):
 
 	category  = fields.Nested(ProductCategorySchema, only = ['name','discount', 'vatTax'], required = True)
 
-	url = URLFor('api.productResource')
+	url = ma.URLFor('api.productResource')
 
 
 class paymentSchema(ma.Schema):
@@ -78,7 +78,7 @@ class paymentSchema(ma.Schema):
 	id  = fields.Integer(dump_only = True)
 	name = fields.String(required = True, validate = validate.Length(1))
 
-	url = URLFor('api.paymentResource', id = "<int:id>", _external = True)
+	url = ma.URLFor('api.paymentResource', id = "<int:id>", _external = True)
 
 	recepts = fields.Nested('ReceptSchema', many = True, exclude=('paymentMethod',))
 
@@ -92,7 +92,7 @@ class ReceptSchema(ma.Schema):
 
 	creditor = fields.Nested('creditorSchema', many = True, exclude = ('receptNumber',))
 
-	url = URLFor('api.ReceptResource')
+	url = ma.URLFor('api.ReceptResource')
 
 
 class creditorSchema(ma.Schema):

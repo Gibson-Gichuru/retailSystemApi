@@ -6,12 +6,12 @@ from schemes import (userRoleSchema, UserSchema, ProductCategorySchema,
 
 
 from flask import Blueprint, request, jsonify, make_response
-from flask_restful import Api, Resource,
+from flask_restful import Api, Resource
 from sqlalchemy.exc import SQLAlchemyError
 
 import status
 
-api_bp = Blueprint('api', __name__)
+api_db = Blueprint('api', __name__)
 user_role_schema = userRoleSchema()
 user_schema = UserSchema()
 product_category_schema = ProductCategorySchema()
@@ -19,7 +19,7 @@ product_schema = productSchema()
 payment_schema = paymentSchema()
 recept_schema = ReceptSchema()
 creditor_schema = creditorSchema()
-api = Api(api_bp)
+api = Api(api_db)
 
 class userRoleResource(Resource):
 	#resource class used to get, update and delete a given userRole
@@ -196,7 +196,7 @@ class userResource(Resource):
 
 			checkRole = UserRole.query.filter_by(name = request_dict['role']).first
 
-			if checkRole not None:
+			if checkRole:
 
 				user.role = checkRole
 
@@ -283,7 +283,7 @@ class userResourceList(Resource):
 
 			checkUser = Users.query.filter_by(userId = request_dict['userId'])
 
-			if checkUser not None:
+			if checkUser:
 
 				response = {"Error": "user with the given Id aready exists"}
 
@@ -404,9 +404,9 @@ class productCategoryResourceList(Resource):
 
 	def get(self):
 
-		categoryList  ProductCategory.query.all()
+		categoryList = ProductCategory.query.all()
 
-		results = ProductCategorySchema(many = True, categoryList).data
+		results = ProductCategorySchema.dump(categoryList,many = True,).data
 
 		return results
 
@@ -416,7 +416,7 @@ class productCategoryResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error: "No input data was given")
+			response = dict(Error= "No input data was given")
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -575,7 +575,7 @@ class productResourceList(Resource):
 
 		products = Products.query.all()
 
-		results = productSchema.dump(many = True, products)
+		results = productSchema.dump(products,many = True)
 
 		return results
 
@@ -626,10 +626,19 @@ class productResourceList(Resource):
 
 					return results, status,HTTP_201_CREATED
 
-			else:manufactureDate
+			else:
+
 				response = dict(Error = "Product with the given productCode aready exists")
 
 				return response, status.HTTP_400_BAD_REQUEST
+
+		except SQLAlchemyError as databaseError:
+
+			db.session.rollback()
+
+			response = jsonify(dict(Errors = str(databaseError)))
+
+			return response, status.HTTP_400_BAD_REQUEST
 
 class paymentResource(Resource):
 	
@@ -705,7 +714,7 @@ class paymentResourceList(Resource):
 
 		paymentModes = PaymentMethod.query.all()
 
-		results = paymentSchema.dump(many = True, paymentModes)
+		results = paymentSchema.dump( paymentModes,many = True)
 
 		return results
 
@@ -716,7 +725,7 @@ class paymentResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error: = "No input data provided")
+			response = dict(Error= "No input data provided")
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -746,7 +755,7 @@ class paymentResourceList(Resource):
 
 			db.session.rollback()
 
-			response = jsonify(dict(Error: str(databaseError)))
+			response = jsonify(dict(Error = str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -781,7 +790,7 @@ class receptResource(Resource):
 
 			if checkPaymentMode is None:
 
-				response = dict(Error:"Payment method {} not available".format(request['meansOfpayment']))
+				response = dict(Error= "Payment method {} not available".format(request['meansOfpayment']))
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -815,7 +824,7 @@ class receptResource(Resource):
 			
 			db.session.rollback()
 
-			response = jsonify(dict(Error: str(databaseError)))
+			response = jsonify(dict(Error = str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 			
@@ -826,7 +835,7 @@ class receptResourceList(Resource):
 
 		recepts = ReceptBook.query.all()
 
-		results = ReceptSchema.dump(many = True, recepts)
+		results = ReceptSchema.dump(recepts,many = True)
 
 		return results
 
@@ -836,7 +845,7 @@ class receptResourceList(Resource):
 
 		if not request_dict:
 
-			response = dict(Error: "No data input was given")
+			response = dict(Error = "No data input was given")
 
 		errors = ReceptSchema.validate(request_dict)
 
@@ -852,7 +861,7 @@ class receptResourceList(Resource):
 
 			if checkPaymentMode is None:
 
-				response = dict(Error: "Payment method not available")
+				response = dict(Error = "Payment method not available")
 
 				return response, status.HTTP_400_BAD_REQUEST
 
@@ -872,7 +881,7 @@ class receptResourceList(Resource):
 			
 			db.session.rollback()
 
-			response = jsonify(dict(Error: str(databaseError)))
+			response = jsonify(dict(Error= str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -914,7 +923,7 @@ class creditorResource(Resource):
 
 			checkRecept = ReceptBook.query.filter_by(receptId = request_dict['recept'])
 
-			if checkRecept not None:
+			if checkRecept:
 
 				creditor.recept = checkRecept
 
@@ -941,7 +950,7 @@ class creditorResource(Resource):
 
 			db.session.rollback()
 
-			response  = jsonify(dict(Error: str(databaseError)))
+			response  = jsonify(dict(Error = str(databaseError)))
 
 			return response, status.HTTP_400_BAD_REQUEST
 
@@ -960,7 +969,7 @@ class creditorResource(Resource):
 			
 			db.session.rollback()
 
-			response = jsonify(dict(Error: str(databaseError)))
+			response = jsonify(dict(Error=  str(databaseError)))
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -971,7 +980,7 @@ class creditorResourceList(Resource):
 
 		creditors = Creditor.query.all()
 
-		results = creditorSchema(many = True, creditors)
+		results = creditorSchema(creditors,many = True)
 
 		return results
 
@@ -1001,7 +1010,7 @@ class creditorResourceList(Resource):
 
 			checkRecept = ReceptBook.query.filter_by(receptId = request_dict['recept']).first()
 
-			if checkRecept not None:
+			if checkRecept:
 
 				newCreditor.recept = checkRecept
 

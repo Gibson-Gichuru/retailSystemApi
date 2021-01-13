@@ -26,6 +26,8 @@ class Crud():
 
 class UserRole(Crud, db.Model):
 
+	__tablename__ = 'userRole'
+
 	id = db.Column(db.Integer, primary_key = True)
 	name = db.Column(db.String(100), unique = True, nullable = False)
 
@@ -35,6 +37,8 @@ class UserRole(Crud, db.Model):
 
 class Users(Crud, db.Model):
 
+	__tablename__ = 'users'
+
 	userId = db.Column(db.String(50), primary_key = True)
 	user_first_name = db.Column(db.String(100), nullable = False)
 	user_last_name = db.Column(db.String(100), nullable = False)
@@ -42,7 +46,7 @@ class Users(Crud, db.Model):
 	user_pass_salt = db.Column(db.String(100), nullable = False)
 	user_pass_hash = db.Column(db.String(300), nullable = False)
 	registration_date = db.Column(db.TIMESTAMP, default = db.func.current_timestamp())
-	user_role = dn.Column(db.Integer, db.ForeignKey("userrole.id", ondelete = "CASCADE"))
+	user_role = db.Column(db.Integer, db.ForeignKey("userRole.id", ondelete = "CASCADE"))
 
 	role = db.relationship("UserRole", backref = db.backref("Role", order_by = "Users.userId"))
 
@@ -58,10 +62,12 @@ class Users(Crud, db.Model):
 
 class ProductCategory(Crud, db.Model):
 
+	__tablename__ = 'productCategory'
+
 	id = db.Column(db.Integer, primary_key = True)
 	name = db.Column(db.String(100), unique = True, nullable = False)
-	discount = db.Column(db.Decimal(8,2), default = 0.0, nullable = False)
-	vatTax = db.Column(db.Decimal(2,1), default = 0.0, nullable = False)
+	discount = db.Column(db.Numeric(8,2), default = 0.0, nullable = False)
+	vatTax = db.Column(db.Numeric(2,1), default = 0.0, nullable = False)
 
 	def __init__(self, name, discount, vatTax):
 
@@ -71,13 +77,16 @@ class ProductCategory(Crud, db.Model):
 
 class Products(Crud, db.Model):
 
+	__tablename__ = 'products'
+
 	productCode = db.Column(db.String(20), primary_key = True)
 	productName = db.Column(db.String(100), unique = True, nullable = False)
 	productDescription = db.Column(db.String(200), nullable = False)
 	manufactureDate = db.Column(db.DateTime, nullable = False)
 	expiryDate = db.Column(db.DateTime, nullable = False)
 	quantity = db.Column(db.Integer, nullable = False)
-	price = db.Column(db.Decimal(4,2), nullable = False)
+	price = db.Column(db.Numeric(4,2), nullable = False)
+	productCategory = db.Column(db.Integer, db.ForeignKey('productCategory.id', ondelete = "CASCADE"), nullable = False)
 
 	category = db.relationship("ProductCategory", backref = db.backref("category", order_by = "productCode"))
 
@@ -93,6 +102,8 @@ class Products(Crud, db.Model):
 
 class PaymentMethod(Crud, db.Model):
 
+	__tablename__ = 'paymentMethod'
+
 	id = db.Column(db.Integer, primary_key = True)
 	name = db.Column(db.String(50), unique =True, nullable = True)
 
@@ -102,10 +113,12 @@ class PaymentMethod(Crud, db.Model):
 
 class ReceptBook(Crud, db.Model):
 
+	__tablename__ = 'receptBook'
+
 	receptId = db.Column(db.Integer, primary_key = True)
 	dateOfPurchase = db.Column(db.DateTime, nullable = False)
-	amount = db.Column(db.Decimal(8,2), nullable = False)
-	meansOfpayment = db.Column(db.Integer, db.ForeignKey("PaymentMethod.id", ondelete = "CASCADE"), nullable = False)
+	amount = db.Column(db.Numeric(8,2), nullable = False)
+	meansOfpayment = db.Column(db.Integer, db.ForeignKey("paymentMethod.id", ondelete = "CASCADE"), nullable = False)
 
 	payment = db.relationship("PaymentMethod", backref = db.backref("payments", order_by="receptId"))
 
@@ -116,12 +129,14 @@ class ReceptBook(Crud, db.Model):
 
 class Creditor(Crud, db.Model):
 
+	__tablename__ = 'creditor'
+
 	creditorId = db.Column(db.String(50), primary_key = True)
 	creditorFistName= db.Column(db.String(50), nullable = False)
 	creditorLastName = db.Column(db.String(50), nullable = False)
 	creditorPhoneNumber = db.Column(db.String(70), nullable = False)
-	amountDue = db.Column(db.Decimal(8,2), default = 0.0, nullable = False)
-	receptNumber = db.Column(db.Integer, db.ForeignKey("ReceptBook", ondelete="CASCADE"), nullable = False)
+	amountDue = db.Column(db.Numeric(8,2), default = 0.0, nullable = False)
+	receptNumber = db.Column(db.Integer, db.ForeignKey("receptBook.receptId", ondelete="CASCADE"), nullable = False)
 
 	dateDue = db.Column(db.DateTime, nullable = False)
 
