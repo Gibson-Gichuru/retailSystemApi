@@ -88,7 +88,7 @@ class Products(Crud, db.Model):
 	price = db.Column(db.Numeric(4,2), nullable = False)
 	productCategory = db.Column(db.Integer, db.ForeignKey('productCategory.id', ondelete = "CASCADE"), nullable = False)
 
-	category = db.relationship("ProductCategory", backref = db.backref("category", order_by = "productCode"))
+	category = db.relationship("ProductCategory", backref = db.backref("category", order_by = "Products.productCode"))
 
 	def __init__(self, productCode, productName, productDescription, manufactureDate, expiryDate, quantity,price):
 
@@ -120,7 +120,7 @@ class ReceptBook(Crud, db.Model):
 	amount = db.Column(db.Numeric(8,2), nullable = False)
 	meansOfpayment = db.Column(db.Integer, db.ForeignKey("paymentMethod.id", ondelete = "CASCADE"), nullable = False)
 
-	payment = db.relationship("PaymentMethod", backref = db.backref("payments", order_by="receptId"))
+	payment = db.relationship("PaymentMethod", backref = db.backref("payments", order_by="ReceptBook.receptId"))
 
 	def __init__(self, dateOfPurchase, amount):
 
@@ -140,7 +140,7 @@ class Creditor(Crud, db.Model):
 
 	dateDue = db.Column(db.DateTime, nullable = False)
 
-	recept = db.relationship("ReceptBook", backref = db.backref("Recept", order_by = "creditorId"))
+	recept = db.relationship("ReceptBook", backref = db.backref("Recept", order_by = "Creditor.creditorId"))
 
 	def __init__(self, creditorId, creditorFistName, creditorLastName, creditorPhoneNumber, amountDue, dateDue):
 

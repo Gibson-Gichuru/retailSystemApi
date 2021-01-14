@@ -11,6 +11,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 import status
 
+import pdb
+
 api_dp = Blueprint('api', __name__)
 user_role_schema = userRoleSchema()
 user_schema = UserSchema()
@@ -30,7 +32,7 @@ class userRoleResource(Resource):
 
 		role = UserRole.query.get_or_404(id)
 
-		results  = userRoleSchema.dump(role).data
+		results  = user_role_schema.dump(role).data
 
 		return results
 
@@ -44,13 +46,13 @@ class userRoleResource(Resource):
 
 			role.name = request_dict['name']
 
-		dumped_message, dumped_errors = userRoleSchema.dump(role)
+		dumped_message, dumped_errors = user_role_schema.dump(role)
 
 		if dumped_errors:
 
 			return dumped_errors, status.HTTP_400_BAD_REQUEST
 
-		validate_errors = userRoleSchema.validate(dumped_message)
+		validate_errors = user_role_schema.validate(dumped_message)
 
 		if validate_errors:
 
@@ -101,14 +103,16 @@ class userRoleResourceList(Resource):
 
 		roles = UserRole.query.all()
 
-		results = userRoleSchema.dump(roles, many = True).data
+		results = user_role_schema.dump(roles, many = True).data
 
 		return results
 
 
 	def post(self):
 
-		request_dict = request.get_json(force = True)
+		request_dict = request.get_json()
+
+
 
 		if not request_dict:
 
@@ -116,24 +120,22 @@ class userRoleResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
+		errors = user_role_schema.validate(request_dict)
 
-		errors = userRoleSchema.validate(request_dict)
-
+		
 		if errors:
 
-			return errors, status.HTTP_400_BAD_REQUEST
+			return jsonifyerrors, status.HTTP_400_BAD_REQUEST
 
 		try:
 
-			role = UserRole.query.filter_by(name = request_dict['name']).first()
+			role_name = request_dict['name']
 
-			if role:
+			role = UserRole.query.filter_by(name = role_name).first()
 
-				response = {"Message": "Role with a given name Exists"}
+			#pdb.set_trace()
 
-				return response, status.HTTP_400_BAD_REQUEST
-
-			else:
+			if role is None:
 
 				newRole = UserRole(name = request_dict['name'])
 
@@ -141,18 +143,25 @@ class userRoleResourceList(Resource):
 
 				query = UserRole.query.get(newRole.id)
 
-				results = userRoleSchema.dump(query).data
+				results = user_role_schema.dump(query).data
 
 				return results, status.HTTP_201_CREATED
+
+			else:
+				
+				response = {"Message": "given user Role aready exists"}
+
+				return response, status.HTTP_400_BAD_REQUEST
+			
 
 
 		except SQLAlchemyError as databaseError:
 
 			db.session.rollback()
 
-			response = jsonify({"Message": str(databaseErrors)})
+			responce = jsonify({"Message": str(databaseError)})
 
-			return response, HTTP_400_BAD_REQUEST
+			return responce, status.HTTP_400_BAD_REQUEST
 
 class userResource(Resource):
 
@@ -160,7 +169,7 @@ class userResource(Resource):
 
 		user = Users.query.get_or_404(id)
 
-		results = UserSchema.dump(user).data
+		results = user_schema.dump(user).data
 
 		return results
 
@@ -203,13 +212,13 @@ class userResource(Resource):
 
 
 
-		dumped_message, dumped_errors = UserSchema.dump(user)
+		dumped_message, dumped_errors = user_schema.dump(user)
 
 		if dumped_errors:
 
 			return dumped_errors, status.HTTP_400_BAD_REQUEST
 
-		validate_errors = UserSchema.validate(dumped_message)
+		validate_errors = user_schema.validate(dumped_message)
 
 		if validate_errors:
 
@@ -260,7 +269,7 @@ class userResourceList(Resource):
 
 		users = Users.query.all()
 
-		results = UserSchema.dump(users).data
+		results = user_schema.dump(users).data
 
 		return results
 
@@ -274,7 +283,7 @@ class userResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-		validate_errors = UserSchema.validate(request_dict)
+		validate_errors = user_schema.validate(request_dict)
 
 		if validate_errors:
 
@@ -308,7 +317,7 @@ class userResourceList(Resource):
 
 				query = Users.query.get(newUser.userId)
 
-				results = UserSchema.dump(query).data
+				results = user_schema.dump(query).data
 
 				return results, status.HTTP_201_CREATED
 
@@ -326,7 +335,7 @@ class productCategoryResource(Resource):
 
 		category = ProductCategory.query.get_or_404(id)
 
-		results = ProductCategorySchema.dump(category).data
+		results = product_category_schema.dump(category).data
 
 		return results
 
@@ -350,14 +359,14 @@ class productCategoryResource(Resource):
 			category.vatTax = request_dict['vatTax']
 
 
-		dumped_message, dumped_errors = ProductCategorySchema.dump(category)
+		dumped_message, dumped_errors = product_category_schema.dump(category)
 
 		if dumped_errors:
 
 			return dumped_errors, status.HTTP_400_BAD_REQUEST
 
 
-		validate_errors = ProductCategorySchema.validate(dumped_message)
+		validate_errors = product_category_schema.validate(dumped_message)
 
 
 		if validate_errors:
@@ -407,7 +416,7 @@ class productCategoryResourceList(Resource):
 
 		categoryList = ProductCategory.query.all()
 
-		results = ProductCategorySchema.dump(categoryList,many = True,).data
+		results = product_category_schema.dump(categoryList,many = True,).data
 
 		return results
 
@@ -422,7 +431,7 @@ class productCategoryResourceList(Resource):
 			return response, status.HTTP_400_BAD_REQUEST
 
 
-		errors = ProductCategorySchema.validate(request_dict)
+		errors = product_category_schema.validate(request_dict)
 
 		if errors:
 
@@ -443,7 +452,7 @@ class productCategoryResourceList(Resource):
 
 				query = ProductCategory.query.get(newCategory.id)
 
-				results = ProductCategorySchema.dump(query).data
+				results = product_category_schema.dump(query).data
 
 				return results, status.HTTP_201_CREATED
 
@@ -461,7 +470,7 @@ class productResource(Resource):
 
 		product = Products.query.get_or_404(id)
 
-		results = productSchema.dump(product).data
+		results = product_schema.dump(product).data
 
 		return results
 
@@ -516,14 +525,14 @@ class productResource(Resource):
 				product.category = checkCategory
 
 
-		dumped_message, dumped_errors = productSchema.dump(product)
+		dumped_message, dumped_errors = product_schema.dump(product)
 
 
 		if dumped_errors:
 
 			return dumped_errors, status.HTTP_400_BAD_REQUEST
 
-		validate_errors = productSchema.validate(dumped_message)
+		validate_errors = product_schema.validate(dumped_message)
 
 		if  validate_errors:
 
@@ -576,7 +585,7 @@ class productResourceList(Resource):
 
 		products = Products.query.all()
 
-		results = productSchema.dump(products,many = True)
+		results = product_schema.dump(products,many = True)
 
 		return results
 
@@ -590,7 +599,7 @@ class productResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-		errors = productSchema.validate(request_dict)
+		errors = product_schema.validate(request_dict)
 
 		if errors:
 
@@ -623,7 +632,7 @@ class productResourceList(Resource):
 
 					query = Products.query.get(newProduct.id)
 
-					results = productSchema.dump(query).data
+					results = product_schema.dump(query).data
 
 					return results, status,HTTP_201_CREATED
 
@@ -647,7 +656,7 @@ class paymentResource(Resource):
 
 		paymentMode = PaymentMethod.query.get_or_404(name)
 
-		results = paymentSchema.dump(paymentMode).data
+		results = payment_schema.dump(paymentMode).data
 
 		return results
 
@@ -662,13 +671,13 @@ class paymentResource(Resource):
 			paymentMode.name = request_dict['name']
 
 
-		dumped_message, dumped_errors = paymentSchema.dump(paymentMode)
+		dumped_message, dumped_errors = payment_schema.dump(paymentMode)
 
 		if dumped_errors:
 
 			return dumped_errors, status.HTTP_400_BAD_REQUEST
 
-		validate_errors = paymentSchema.validate(dumped_message)
+		validate_errors = payment_schema.validate(dumped_message)
 
 		if validate_errors:
 
@@ -715,7 +724,7 @@ class paymentResourceList(Resource):
 
 		paymentModes = PaymentMethod.query.all()
 
-		results = paymentSchema.dump( paymentModes,many = True)
+		results = payment_schema.dump( paymentModes,many = True)
 
 		return results
 
@@ -730,7 +739,7 @@ class paymentResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-		errors = paymentSchema.validate(request_dict)
+		errors = payment_schema.validate(request_dict)
 
 		if errors:
 
@@ -748,7 +757,7 @@ class paymentResourceList(Resource):
 
 				query = PaymentMethod.query.get(newPaymentMode.id)
 
-				results = paymentSchema.dump(query).data
+				results = payment_schema.dump(query).data
 
 				return results, status.HTTP_201_CREATED
 
@@ -767,7 +776,7 @@ class receptResource(Resource):
 
 		recept = ReceptBook.query.get_or_404(id)
 
-		results = ReceptSchema.dump(recept).data
+		results = recept_schema.dump(recept).data
 
 		return results
 
@@ -796,8 +805,16 @@ class receptResource(Resource):
 				return response, status.HTTP_400_BAD_REQUEST
 
 			else:
+
 				
 				recept.meansOfpayment = checkPaymentMode
+
+				errors = recept_schema.validate(request_dict)
+
+				if errors:
+
+					return errors, status.HTTP_400_BAD_REQUEST
+
 
 				try:
 					recept.update()
@@ -836,7 +853,7 @@ class receptResourceList(Resource):
 
 		recepts = ReceptBook.query.all()
 
-		results = ReceptSchema.dump(recepts,many = True)
+		results = recept_schema.dump(recepts,many = True)
 
 		return results
 
@@ -848,7 +865,7 @@ class receptResourceList(Resource):
 
 			response = dict(Message= "No data input was given")
 
-		errors = ReceptSchema.validate(request_dict)
+		errors = recept_schema.validate(request_dict)
 
 		if errors:
 
@@ -874,7 +891,7 @@ class receptResourceList(Resource):
 
 				query = ReceptBook.query.get(newRecept.receptId)
 
-				results = ReceptSchema.dump(query).data
+				results = recept_schema.dump(query).data
 
 				return results, status.HTTP_201_CREATED
 			
@@ -981,7 +998,7 @@ class creditorResourceList(Resource):
 
 		creditors = Creditor.query.all()
 
-		results = creditorSchema(creditors,many = True)
+		results = creditor_schema.dump(creditors,many = True)
 
 		return results
 
@@ -995,7 +1012,7 @@ class creditorResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-		errors = creditorSchema.validate(request_dict)
+		errors = creditor_schema.validate(request_dict)
 
 		if errors:
 
@@ -1019,7 +1036,7 @@ class creditorResourceList(Resource):
 
 				query = Creditor.query.get(newCreditor.id)
 
-				results = creditorSchema.dump(query).data
+				results = creditor_schema.dump(query).data
 
 				return results, status.HTTP_201_CREATED
 
