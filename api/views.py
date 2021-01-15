@@ -40,15 +40,15 @@ class userRoleResource(Resource):
 
 		request_dict = request.get_json(force = True)
 
-		role = role = UserRole.query.get_or_404(id)
+		role = UserRole.query.get_or_404(id)
 
 		if "name" in request_dict:
 
 			role.name = request_dict['name']
 
-		dumped_message, dumped_errors = user_role_schema.dump(role)
+		dumped_message, dumped_error = user_role_schema.dump(role)
 
-		if dumped_errors:
+		if dumped_error:
 
 			return dumped_errors, status.HTTP_400_BAD_REQUEST
 
@@ -78,7 +78,6 @@ class userRoleResource(Resource):
 
 		role = UserRole.query.get_or_404(id)
 
-		pdb.set_trace()
 
 		try:
 

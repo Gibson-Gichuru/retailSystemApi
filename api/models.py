@@ -12,17 +12,17 @@ class Crud():
 	def create(self, resource):
 
 		db.session.add(resource)
-		db.session.commit()
+		return db.session.commit()
 
 	def update(self):
 
-		db.commit()
+		return db.commit()
 
 	def delete(self, resource):
 
-		db.delete(resource)
-		db.commit()
+		db.session.delete(resource)
 
+		return db.session.commit()
 
 class UserRole(Crud, db.Model):
 
