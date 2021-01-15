@@ -32,7 +32,7 @@ class userRoleResource(Resource):
 
 		role = UserRole.query.get_or_404(id)
 
-		results  = user_role_schema.dump(role).data
+		results  = user_role_schema.dump(role)
 
 		return results
 
@@ -78,11 +78,13 @@ class userRoleResource(Resource):
 
 		role = UserRole.query.get_or_404(id)
 
+		pdb.set_trace()
+
 		try:
 
 			delete = role.delete(role)
 
-			response = make_response
+			response = make_response()
 
 			return response, status.HTTP_204_NO_CONTENT
 
@@ -90,7 +92,7 @@ class userRoleResource(Resource):
 
 			db.session.rollback()
 
-			response = jsonify({"Message": str(databaseErrors)})
+			response = jsonify({"Message": str(databaseError)})
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
@@ -103,7 +105,7 @@ class userRoleResourceList(Resource):
 
 		roles = UserRole.query.all()
 
-		results = user_role_schema.dump(roles, many = True).data
+		results = user_role_schema.dump(roles, many = True)
 
 		return results
 
@@ -132,8 +134,6 @@ class userRoleResourceList(Resource):
 			role_name = request_dict['name']
 
 			role = UserRole.query.filter_by(name = role_name).first()
-
-			#pdb.set_trace()
 
 			if role is None:
 
@@ -1056,17 +1056,17 @@ class creditorResourceList(Resource):
 			return response, status.HTTP_400_BAD_REQUEST
 			
 
-api.add_resource(userRoleResourceList,'/userRoles')
+api.add_resource(userRoleResourceList,'/userRoles/')
 api.add_resource(userRoleResource, '/userRoles/<int:id>')
-api.add_resource(userResourceList, '/users')
+api.add_resource(userResourceList, '/users/')
 api.add_resource(userResource, '/users/<int:id>')
-api.add_resource(productCategoryResourceList,'/ProductCategory')
+api.add_resource(productCategoryResourceList,'/ProductCategory/')
 api.add_resource(productCategoryResource, '/ProductCategory/<int:id>')
-api.add_resource(productResourceList,'/products')
+api.add_resource(productResourceList,'/products/')
 api.add_resource(productResource, '/products/<productCode>')
-api.add_resource(paymentResourceList, '/payments')
+api.add_resource(paymentResourceList, '/payments/')
 api.add_resource(paymentResource,'/payments/<int:id>')
-api.add_resource(receptResourceList,'/recept')
+api.add_resource(receptResourceList,'/recept/')
 api.add_resource(receptResource,'/recept/<int:id>')
-api.add_resource(creditorResourceList, '/creditor')
+api.add_resource(creditorResourceList, '/creditor/')
 api.add_resource(creditorResource, '/creditor/<id>')

@@ -11,7 +11,7 @@ class userRoleSchema(ma.Schema):
 
 	users = fields.Nested("UserSchema", many = True, exclude = ('role',))
 
-	url  = ma.URLFor('api.userRoleResource', id = "<int:id>", _external = True)
+	url  = ma.URLFor('api.userroleresource', id = "<id>", _external = True)
 
 
 class UserSchema(ma.Schema):
@@ -20,7 +20,7 @@ class UserSchema(ma.Schema):
 	user_first_name = fields.String(required = True)
 	user_last_name = fields.String(required = True)
 	user_email = fields.String(required = True, validate = validate.Length(5))
-	role = fields.Nested(userRoleSchema, only = ['name', 'url'], required = True)
+	role = fields.Nested(userRoleSchema, only = ['id','name', 'url'], required = True)
 
 	@pre_load
 	def process_role(self,data):
@@ -55,7 +55,7 @@ class ProductCategorySchema(ma.Schema):
 
 	products = fields.Nested("ProductSchema", many = True, exclude = ('category',))
 
-	url = ma.URLFor('api.productCategoryResource')
+	url = ma.URLFor('api.productcategoryresource')
 
 
 class productSchema(ma.Schema):
@@ -70,7 +70,7 @@ class productSchema(ma.Schema):
 
 	category  = fields.Nested(ProductCategorySchema, only = ['name','discount', 'vatTax'], required = True)
 
-	url = ma.URLFor('api.productResource')
+	url = ma.URLFor('api.productresource')
 
 
 class paymentSchema(ma.Schema):
@@ -92,7 +92,7 @@ class ReceptSchema(ma.Schema):
 
 	creditor = fields.Nested('creditorSchema', many = True, exclude = ('receptNumber',))
 
-	url = ma.URLFor('api.receptResource')
+	url = ma.URLFor('api.receptresource')
 
 
 class creditorSchema(ma.Schema):
@@ -108,4 +108,4 @@ class creditorSchema(ma.Schema):
 
 	dateDue = fields.Date('%Y-%m-%d')
 
-	url = ma.URLFor('api.creditorResource')
+	url = ma.URLFor('api.creditorresource')
