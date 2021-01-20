@@ -35,6 +35,29 @@ class UserRole(Crud, db.Model):
 
 		self.name = name
 
+
+	@classmethod
+	def is_unique(cls, id, name):
+
+		existing_role = cls.query.filter_by(name == name).first()
+
+		if existing_role is None:
+
+			return True
+
+		else:
+			
+			if existing_role.id == id:
+
+				return True
+
+			else:
+				
+				return False
+			
+		
+
+
 class Users(Crud, db.Model):
 
 	__tablename__ = 'users'
@@ -60,6 +83,18 @@ class Users(Crud, db.Model):
 		self.user_pass_salt = passSalt 
 		self.user_pass_hash = PassHash
 
+
+	@classmethod
+	def email_is_unique(cls, email):
+
+		existing_user_email = cls.query.filter_by(email == email).first()
+
+		if existing_user_email is None:
+
+			return True
+
+		
+
 class ProductCategory(Crud, db.Model):
 
 	__tablename__ = 'productCategory'
@@ -75,12 +110,34 @@ class ProductCategory(Crud, db.Model):
 		self.discount = discount
 		self.vatTax = vatTax
 
+
+	@classmethod
+	def is_unique(cls, id, name):
+
+		existing_category = cls.query.filter_by(name = name).first()
+
+		if existing_category is None:
+
+			return True
+
+		else:
+			
+			if existing_category.id == id:
+
+				return True
+
+			else:
+				
+				return False
+			
+		
+
 class Products(Crud, db.Model):
 
 	__tablename__ = 'products'
 
 	productCode = db.Column(db.String(20), primary_key = True)
-	productName = db.Column(db.String(100), unique = True, nullable = False)
+	productName = db.Column(db.String(100), nullable = False)
 	productDescription = db.Column(db.String(200), nullable = False)
 	manufactureDate = db.Column(db.DateTime, nullable = False)
 	expiryDate = db.Column(db.DateTime, nullable = False)
@@ -110,6 +167,26 @@ class PaymentMethod(Crud, db.Model):
 	def __init__(self, name):
 
 		self.name = name
+
+
+	@classmethod
+	def is_unique(cls, id, name):
+
+		existing_payment_method = cls.query.filter_by(name = name).first()
+
+		if existing_payment_method is None:
+
+			return True
+
+		else:
+			
+			if existing_payment_method.id == id:
+
+				return True
+
+			else:
+				
+				return False
 
 class ReceptBook(Crud, db.Model):
 

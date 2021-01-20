@@ -46,6 +46,9 @@ class userRoleResource(Resource):
 
 			role.name = request_dict['name']
 
+
+		pdb.set_trace()
+
 		dumped_message, dumped_error = user_role_schema.dump(role)
 
 		if dumped_error:
@@ -142,7 +145,7 @@ class userRoleResourceList(Resource):
 
 				query = UserRole.query.get(newRole.id)
 
-				results = user_role_schema.dump(query).data
+				results = user_role_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
 
@@ -168,7 +171,7 @@ class userResource(Resource):
 
 		user = Users.query.get_or_404(id)
 
-		results = user_schema.dump(user).data
+		results = user_schema.dump(user)
 
 		return results
 
@@ -268,7 +271,7 @@ class userResourceList(Resource):
 
 		users = Users.query.all()
 
-		results = user_schema.dump(users).data
+		results = user_schema.dump(users)
 
 		return results
 
@@ -316,7 +319,7 @@ class userResourceList(Resource):
 
 				query = Users.query.get(newUser.userId)
 
-				results = user_schema.dump(query).data
+				results = user_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
 
@@ -334,7 +337,7 @@ class productCategoryResource(Resource):
 
 		category = ProductCategory.query.get_or_404(id)
 
-		results = product_category_schema.dump(category).data
+		results = product_category_schema.dump(category)
 
 		return results
 
@@ -415,7 +418,7 @@ class productCategoryResourceList(Resource):
 
 		categoryList = ProductCategory.query.all()
 
-		results = product_category_schema.dump(categoryList,many = True,).data
+		results = product_category_schema.dump(categoryList,many = True,)
 
 		return results
 
@@ -451,7 +454,7 @@ class productCategoryResourceList(Resource):
 
 				query = ProductCategory.query.get(newCategory.id)
 
-				results = product_category_schema.dump(query).data
+				results = product_category_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
 
@@ -469,7 +472,7 @@ class productResource(Resource):
 
 		product = Products.query.get_or_404(id)
 
-		results = product_schema.dump(product).data
+		results = product_schema.dump(product)
 
 		return results
 
@@ -631,7 +634,7 @@ class productResourceList(Resource):
 
 					query = Products.query.get(newProduct.id)
 
-					results = product_schema.dump(query).data
+					results = product_schema.dump(query)
 
 					return results, status,HTTP_201_CREATED
 
@@ -655,7 +658,7 @@ class paymentResource(Resource):
 
 		paymentMode = PaymentMethod.query.get_or_404(name)
 
-		results = payment_schema.dump(paymentMode).data
+		results = payment_schema.dump(paymentMode)
 
 		return results
 
@@ -756,7 +759,7 @@ class paymentResourceList(Resource):
 
 				query = PaymentMethod.query.get(newPaymentMode.id)
 
-				results = payment_schema.dump(query).data
+				results = payment_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
 
@@ -775,7 +778,7 @@ class receptResource(Resource):
 
 		recept = ReceptBook.query.get_or_404(id)
 
-		results = recept_schema.dump(recept).data
+		results = recept_schema.dump(recept)
 
 		return results
 
@@ -890,7 +893,7 @@ class receptResourceList(Resource):
 
 				query = ReceptBook.query.get(newRecept.receptId)
 
-				results = recept_schema.dump(query).data
+				results = recept_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
 			
@@ -908,7 +911,7 @@ class creditorResource(Resource):
 
 		creditor = Creditor.query.get_or_404(id)
 
-		results = creditorSchema.dump(creditor).data 
+		results = creditorSchema.dump(creditor) 
 
 		return results
 
@@ -1035,7 +1038,7 @@ class creditorResourceList(Resource):
 
 				query = Creditor.query.get(newCreditor.id)
 
-				results = creditor_schema.dump(query).data
+				results = creditor_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
 
