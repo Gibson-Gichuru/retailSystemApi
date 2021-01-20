@@ -9,6 +9,8 @@ from flask import Blueprint, request, jsonify, make_response
 from flask_restful import Api, Resource
 from sqlalchemy.exc import SQLAlchemyError
 
+from helper import PaginationHelper
+
 import status
 
 import pdb
@@ -105,9 +107,11 @@ class userRoleResourceList(Resource):
 
 	def get(self):
 
-		roles = UserRole.query.all()
+		pagination_helper = PaginationHelper(request, query = UserRole.query,
+			key_name = "Roles", resource_for_url = "api.userroleresourcelist",
+			schema = user_role_schema)
 
-		results = user_role_schema.dump(roles, many = True)
+		results = pagination_helper.paginate_query()
 
 		return results
 
@@ -269,9 +273,11 @@ class userResourceList(Resource):
 
 	def get(self):
 
-		users = Users.query.all()
+		pagination_helper = PaginationHelper(request, query = Users.query,
+			key_name = "Users", resource_for_url = 'api.userresourcelist',
+			schema = user_schema)
 
-		results = user_schema.dump(users)
+		results = pagination_helper.paginate_query()
 
 		return results
 
@@ -423,9 +429,11 @@ class productCategoryResourceList(Resource):
 
 	def get(self):
 
-		categoryList = ProductCategory.query.all()
+		pagination_helper = PaginationHelper(request, query = ProductCategory.query,
+			key_name = 'Product Categories', resource_for_url = 'api.productcategoryresourcelist',
+			schema = product_category_schema)
 
-		results = product_category_schema.dump(categoryList,many = True,)
+		results = pagination_helper.paginate_query()
 
 		return results
 
@@ -599,9 +607,11 @@ class productResourceList(Resource):
 
 	def get(self):
 
-		products = Products.query.all()
+		pagination_helper = PaginationHelper(request, query = Products.query,
+			key_name = "Products", resource_for_url = 'api.productresourcelist',
+			schema = product_schema)
 
-		results = product_schema.dump(products,many = True)
+		results = pagination_helper = paginate_query()
 
 		return results
 
@@ -738,9 +748,11 @@ class paymentResourceList(Resource):
 
 	def get(self):
 
-		paymentModes = PaymentMethod.query.all()
+		pagination_helper = PaginationHelper(request, query = PaymentMethod.query,
+			key_name = 'Payment Methods', resource_for_url='api.paymentresourcelist',
+			schema = payment_schema)
 
-		results = payment_schema.dump( paymentModes,many = True)
+		results = pagination_helper.paginate_query()
 
 		return results
 
@@ -874,9 +886,11 @@ class receptResourceList(Resource):
 	
 	def get(self):
 
-		recepts = ReceptBook.query.all()
+		pagination_helper = PaginationHelper(request, query = ReceptBook.query,
+			key_name = 'recepts', resource_for_url = 'api.receptresourcelist',
+			schema = recept_schema)
 
-		results = recept_schema.dump(recepts,many = True)
+		results = pagination_helper.paginate_query()
 
 		return results
 
@@ -1019,9 +1033,11 @@ class creditorResourceList(Resource):
 
 	def get(self):
 
-		creditors = Creditor.query.all()
+		pagination_helper = PaginationHelper(request, query = Creditor.query, 
+			key_name = 'Creditors', resource_for_url = 'api.creditorresourcelist',
+			schema = creditor_schema)
 
-		results = creditor_schema.dump(creditors,many = True)
+		results = pagination_helper.paginate_query()
 
 		return results
 
