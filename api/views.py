@@ -131,6 +131,13 @@ class userRoleResourceList(Resource):
 
 			return jsonifyerrors, status.HTTP_400_BAD_REQUEST
 
+
+		if not UserRole.is_unique(id = 0, name = request_dict['name']):
+
+			response = dict(Message = "A role with the given name exists")
+
+			return response, status.HTTP_400_BAD_REQUEST
+
 		try:
 
 			role_name = request_dict['name']
@@ -148,14 +155,7 @@ class userRoleResourceList(Resource):
 				results = user_role_schema.dump(query)
 
 				return results, status.HTTP_201_CREATED
-
-			else:
-				
-				response = {"Message": "given user Role aready exists"}
-
-				return response, status.HTTP_400_BAD_REQUEST
 			
-
 
 		except SQLAlchemyError as databaseError:
 
@@ -305,6 +305,13 @@ class userResourceList(Resource):
 
 				role = UserRole.query.filter_by(name = request_dict['role']).first()
 
+				if not Users.email_is_unique(request_dict['user_email']):
+
+					response = dict(Message = "The given Email Aready exists")
+
+					return response, status.HTTP_400_BAD_REQUEST
+
+
 				newUser = Users(userId= request_dict['userId'], 
 					user_first_name = request_dict['user_first_name'],
 					user_last_name = request_dict['user_last_name'],
@@ -438,6 +445,13 @@ class productCategoryResourceList(Resource):
 		if errors:
 
 			return errors, status.HTTP_400_BAD_REQUEST
+
+
+		if not ProductCategory.is_unique(id = 0, name = request_dict['name']):
+
+			response = dict(Message = "A product Category with the given name aready exists")
+
+			return response, status.HTTP_400_BAD_REQUEST
 
 
 		try:
@@ -746,6 +760,13 @@ class paymentResourceList(Resource):
 		if errors:
 
 			return errors, HTTP_400_BAD_REQUEST
+
+
+		if not ReceptBook.is_unique(id = 0, name = request_dict['name']):
+
+			response = dict(Message = "A payment Method with the given name exists")
+
+			return response, status.HTTP_400_BAD_REQUEST
 
 		try:
 
