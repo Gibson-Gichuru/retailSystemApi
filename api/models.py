@@ -39,7 +39,7 @@ class UserRole(Crud, db.Model):
 	@classmethod
 	def is_unique(cls, id, name):
 
-		existing_role = cls.query.filter_by(name == name).first()
+		existing_role = cls.query.filter_by(name = name).first()
 
 		if existing_role is None:
 

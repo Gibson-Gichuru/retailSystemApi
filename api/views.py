@@ -88,7 +88,7 @@ class userRoleResource(Resource):
 
 			delete = role.delete(role)
 
-			response = make_response()
+			response = {"Message":"user role delete was a success"}
 
 			return response, status.HTTP_204_NO_CONTENT
 
