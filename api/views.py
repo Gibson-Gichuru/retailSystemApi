@@ -13,7 +13,35 @@ from helper import PaginationHelper
 
 import status
 
-import pdb
+from flask_httpauth import HTTPBasicAuth
+from flask import g
+
+auth = HTTPBasicAuth()
+
+# create a function call back for the HTTPAuth to validate users
+
+@auth.verify_password
+def verify_user_password(user_email, password):
+
+	user = Users.query.filter_by(user_email = user_email).first()
+
+	if not user or user.verify_password(password):
+
+		return False
+
+	g.user = user
+
+	return True
+
+
+#create a resource class blueprint that requiers authentication
+
+class AutheRequiredResource(Resource):
+
+	method_decorators = [auth.login_required]
+
+
+
 
 api_dp = Blueprint('api', __name__)
 user_role_schema = userRoleSchema()
@@ -25,7 +53,7 @@ recept_schema = ReceptSchema()
 creditor_schema = creditorSchema()
 api = Api(api_dp)
 
-class userRoleResource(Resource):
+class userRoleResource(AutheRequiredResource):
 	#resource class used to get, update and delete a given userRole
 
 	def get(self,id):
@@ -101,7 +129,7 @@ class userRoleResource(Resource):
 			return response, status.HTTP_401_UNAUTHORIZED
 
 
-class userRoleResourceList(Resource):
+class userRoleResourceList(AutheRequiredResource):
 
 	#Get all the roles registered in the database and pass new role values to create new roles
 
@@ -169,7 +197,7 @@ class userRoleResourceList(Resource):
 
 			return responce, status.HTTP_400_BAD_REQUEST
 
-class userResource(Resource):
+class userResource(AutheRequiredResource):
 
 	def get(self, id):
 
@@ -271,6 +299,7 @@ class userResource(Resource):
 
 class userResourceList(Resource):
 
+	@auth.login_required
 	def get(self):
 
 		pagination_helper = PaginationHelper(request, query = Users.query,
@@ -344,7 +373,7 @@ class userResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-class productCategoryResource(Resource):
+class productCategoryResource(AutheRequiredResource):
 
 	def get(self, id):
 
@@ -425,7 +454,7 @@ class productCategoryResource(Resource):
 			return response, status.HTTP_401_UNAUTHORIZED
 
 
-class productCategoryResourceList(Resource):
+class productCategoryResourceList(AutheRequiredResource):
 
 	def get(self):
 
@@ -488,7 +517,7 @@ class productCategoryResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-class productResource(Resource):
+class productResource(AutheRequiredResource):
 
 	def get(self, id):
 
@@ -603,7 +632,7 @@ class productResource(Resource):
 
 
 
-class productResourceList(Resource):
+class productResourceList(AutheRequiredResource):
 
 	def get(self):
 
@@ -676,7 +705,7 @@ class productResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-class paymentResource(Resource):
+class paymentResource(AutheRequiredResource):
 	
 	def get(self, name):
 
@@ -744,7 +773,7 @@ class paymentResource(Resource):
 
 			return response, status.HTTP_401_UNAUTHORIZED
 
-class paymentResourceList(Resource):
+class paymentResourceList(AutheRequiredResource):
 
 	def get(self):
 
@@ -806,7 +835,7 @@ class paymentResourceList(Resource):
 
 
 
-class receptResource(Resource):
+class receptResource(AutheRequiredResource):
 	def get(self, id):
 
 		recept = ReceptBook.query.get_or_404(id)
@@ -882,7 +911,7 @@ class receptResource(Resource):
 			return response, status.HTTP_400_BAD_REQUEST
 			
 
-class receptResourceList(Resource):
+class receptResourceList(AutheRequiredResource):
 	
 	def get(self):
 
@@ -940,7 +969,7 @@ class receptResourceList(Resource):
 
 			return response, status.HTTP_400_BAD_REQUEST
 
-class creditorResource(Resource):
+class creditorResource(AutheRequiredResource):
 
 	def get(self, id):
 
@@ -1029,7 +1058,7 @@ class creditorResource(Resource):
 			return response, status.HTTP_401_UNAUTHORIZED
 
 
-class creditorResourceList(Resource):
+class creditorResourceList(AutheRequiredResource):
 
 	def get(self):
 

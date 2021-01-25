@@ -4,6 +4,10 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
+from passlib.apps import custom_app_context as password_context
+
+import re
+
 db = SQLAlchemy()
 ma = Marshmallow()
 
@@ -66,7 +70,6 @@ class Users(Crud, db.Model):
 	user_first_name = db.Column(db.String(100), nullable = False)
 	user_last_name = db.Column(db.String(100), nullable = False)
 	user_email = db.Column(db.String(250), unique = True, nullable = False)
-	user_pass_salt = db.Column(db.String(100), nullable = False)
 	user_pass_hash = db.Column(db.String(300), nullable = False)
 	registration_date = db.Column(db.TIMESTAMP, default = db.func.current_timestamp())
 	user_role = db.Column(db.Integer, db.ForeignKey("userRole.id", ondelete = "CASCADE"))
@@ -74,15 +77,12 @@ class Users(Crud, db.Model):
 	role = db.relationship("UserRole", backref = db.backref("Role", order_by = "Users.userId"))
 
 
-	def __init__(self, Id, firstName, lastName, Email, passSalt, PassHash):
+	def __init__(self, Id, firstName, lastName, Email):
 
 		self.userId = Id
 		self.user_first_name = firstName
 		self.user_last_name = lastName
 		self.user_email = Email
-		self.user_pass_salt = passSalt 
-		self.user_pass_hash = PassHash
-
 
 	@classmethod
 	def email_is_unique(cls, email):
@@ -90,8 +90,42 @@ class Users(Crud, db.Model):
 		existing_user_email = cls.query.filter_by(email == email).first()
 
 		if existing_user_email is None:
-
 			return True
+
+
+
+	def verify_password(self, password):
+
+		return password_context.verify(password, self.user_pass_hash)
+
+
+	def check_password_if_ok_hash(self,password):
+
+		"""check the length of the password and check the quality of the password
+				1>>>>>>>>>>If it contains atleast on lower case letter
+				2>>>>>>>>>>>If it contains atleast one upper case letter
+				3>>>>>>>>>>>if it contains atleast on symble"""
+
+
+		if len(password) < 8:
+
+			return "The password given is too short"
+
+		if re.search(r'[A-Z]', password) is None:
+
+			return "The password must contain atleast on uppercase letter"
+
+		if re.search(r'[a-z]', password) is None:
+
+			return "The password must contain atleast one lower case letter"
+
+		if re.search(r'[!@#$%^&*()_+=|\{}[]:;""''<,>.?/]', password) is None:
+
+			return "The password must contain atleast on symble"
+
+		self.user_pass_hash = password_context.encrypt(password)
+
+		return '', True 
 
 		
 
